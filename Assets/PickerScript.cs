@@ -178,7 +178,10 @@ public class VectorObjectList {
     }
     public void UpdateWhereVector(Vector2 v){
         int index = this.ClosestToVector(v);
-        arr[index].UpdatePosition(v);
+        if(index != -1)
+        {
+            arr[index].UpdatePosition(v);
+        }
     }
     public void RemoveWhereVector(Vector2 v){
         int index = this.ClosestToVector(v);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using GameAnalyticsSDK;
+using TMPro;
 
 public class PickerScript : MonoBehaviour
 {
@@ -20,9 +21,14 @@ public class PickerScript : MonoBehaviour
     public GameObject icon9;
     public GameObject icon10;
     public GameObject BackButton;
+    public GameObject DropdownObject;
+    public TMP_Dropdown Dropdown;
+    public TMP_Text HowMany;
+    private System.Random r = new System.Random();
     private bool gameActive = true;
+    private int amountToPick = 1;
     public Text Countdown;
-    private float timeLeft = 5.0f;
+    private float timeLeft = 3.0f;
     void Awake()
     {
         Debug.Log("Good Morning");
@@ -32,9 +38,9 @@ public class PickerScript : MonoBehaviour
     void Update()
     {
         int touchCount = Input.touchCount;
+        amountToPick = Dropdown.value + 1;
         if(touchCount > 0 && gameActive && touchCount <= icons.Length)
         {
-            if(touchCount == 2) BackButton.SetActive(false);
             for(int i = 0; i < touchCount; i++)
             {
                 Touch touch = Input.GetTouch(i);
@@ -50,8 +56,11 @@ public class PickerScript : MonoBehaviour
                     destroyIcon(pos);
                 }
             }
-            if(touchCount > 1 && positions.GetLength() > 1)
+            if(touchCount > amountToPick && positions.GetLength() > amountToPick)
             {
+                BackButton.SetActive(false);
+                DropdownObject.SetActive(false);
+                HowMany.text = "";
                 if(numOfPlayers != 0 && numOfPlayers == touchCount)
                 {
                     timeLeft -= Time.deltaTime;
@@ -64,8 +73,8 @@ public class PickerScript : MonoBehaviour
                     }
                 }else{
                     numOfPlayers = touchCount;
-                    Countdown.text = "5";
-                    timeLeft = 5.0f;
+                    timeLeft = 3.0f;
+                    Countdown.text = timeLeft.ToString();
                 }
             }else{
                 numOfPlayers = 0;
@@ -76,8 +85,11 @@ public class PickerScript : MonoBehaviour
                 positions.CleanScreen();
             }
             Countdown.text = "";
+            timeLeft = 3.0f;
             gameActive = true;
             BackButton.SetActive(true);
+            DropdownObject.SetActive(true);
+            HowMany.text = "How Many to Pick : ";
         }
     }
 
@@ -100,22 +112,27 @@ public class PickerScript : MonoBehaviour
     {
         gameActive = false;
         int playerLength = positions.GetLength();
-        System.Random r = new System.Random();
-        int randomIndex = r.Next(playerLength); 
-        for(int i = 0; i < positions.GetLength(); i++)
-        { 
-            Debug.Log( i + "random " + randomIndex);
-            if(i < randomIndex){
-                positions.RemoveAt(i);
-                randomIndex--;
-                i--;
-            }
-            if(i > randomIndex)
-            {
-                positions.RemoveAt(i);
-                i--;
-            }
+        for(int i = playerLength; i > amountToPick; i--){
+            int randomIndexToRemove = r.Next(i);
+            Debug.Log("int to remove: " + randomIndexToRemove);
+            positions.RemoveAt(randomIndexToRemove);
         }
+
+        // System.Random r = new System.Random();
+        // int randomIndex = r.Next(playerLength); 
+        // for(int i = 0; i < positions.GetLength(); i++)
+        // { 
+        //     if(i < randomIndex){
+        //         positions.RemoveAt(i);
+        //         randomIndex--;
+        //         i--;
+        //     }
+        //     if(i > randomIndex)
+        //     {
+        //         positions.RemoveAt(i);
+        //         i--;
+        //     }
+        // }
         GameAnalytics.NewProgressionEvent(GAProgressionStatus.Complete, "Play Game");
     }
 }
